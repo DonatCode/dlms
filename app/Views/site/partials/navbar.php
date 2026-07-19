@@ -4,7 +4,7 @@
         <div class="flex items-center gap-12">
             <a href="/" class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary text-[28px]">menu_book</span>
-                <span class="font-headline-md text-headline-md font-bold text-primary">Perpustakaan Online</span>
+                <span class="font-headline-md text-headline-md font-bold text-primary">Perpustakaan Online BaBook</span>
             </a>
             <nav class="hidden md:flex items-center gap-8">
                 <a href="/" class="font-label-md text-label-md pb-1 <?= $active === 'beranda' ? 'text-primary font-bold border-b-2 border-primary' : 'text-on-surface-variant hover:text-primary transition-colors' ?>">Beranda</a>

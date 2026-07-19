@@ -8,7 +8,7 @@
 <header class="fixed top-0 left-0 w-full z-50 h-[72px] flex items-center px-margin-mobile md:px-margin-desktop bg-surface-container-lowest border-b border-outline-variant">
     <a href="/" class="flex items-center gap-2">
         <span class="material-symbols-outlined text-primary text-[28px]">menu_book</span>
-        <span class="font-headline-md text-headline-md font-bold text-primary">Perpustakaan Online</span>
+        <span class="font-headline-md text-headline-md font-bold text-primary">BaBook</span>
     </a>
 </header>
 

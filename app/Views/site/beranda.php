@@ -16,8 +16,7 @@
                     Selamat datang di <br> <span class="text-primary">BaBook</span>
                 </h1>
                 <p class="font-body-lg text-body-lg text-on-surface-variant mb-8 max-w-lg">
-                    Jelajahi koleksi buku digital secara gratis. Tanpa login Anda sudah bisa membaca di situs
-                    masuk atau daftar untuk bisa mengunduh file PDF-nya.
+                    Jelajahi koleksi buku digital favorite anda secara gratis. 
                 </p>
                 <form id="form-hero-search" class="flex flex-col sm:flex-row gap-4 max-w-xl">
                     <div class="relative flex-grow">

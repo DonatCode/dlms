@@ -75,3 +75,9 @@ Link Erd: https://drive.google.com/file/d/1fjf-56d6HZn5xiSpnSdRhnor5lBgGniR/view
 Link Postman: Berbayar jika kirim link
 
 Link SRS: https://drive.google.com/file/d/1LuKpb9yIz2fR4uIpsVLpICx0Qx2g4AAk/view?usp=sharing
+
+Anggota: Rizki Ramdani (2306700008)
+Surya Kevin (2306700031)
+M Fajar Y (2306700010)
+Candra Ardiansah (2306700002)
+Syaiful Mukmin (2306700024)

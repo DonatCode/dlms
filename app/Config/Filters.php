@@ -108,5 +108,12 @@ class Filters extends BaseFilters
      *
      * @var array<string, array<string, list<string>>>
      */
-    public array $filters = [];
+    public array $filters = [
+        // Filter CORS sebelumnya hanya terdaftar sebagai alias (lihat $aliases di atas)
+        // tapi tidak pernah dipasang ke rute manapun, sehingga preflight request
+        // (OPTIONS) dan header Access-Control-* tidak pernah dikirim balik oleh server.
+        // Ini membuat REST API gagal diakses dari frontend yang berbeda origin
+        // (mis. admin panel/SPA yang dijalankan di port lain).
+        'cors' => ['before' => ['api/*']],
+    ];
 }

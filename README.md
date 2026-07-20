@@ -67,3 +67,11 @@ Additionally, make sure that the following extensions are enabled in your PHP:
 - json (enabled by default - don't turn it off)
 - [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
 - [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+
+Link Figma: https://www.figma.com/proto/U9x1QyXxcFxDivbvSfRqPW/dlms?node-id=0-1&t=6MyxlBX5F7oWjFit-1 
+
+Link Erd: https://drive.google.com/file/d/1fjf-56d6HZn5xiSpnSdRhnor5lBgGniR/view?usp=sharing
+
+Link Postman: Berbayar jika kirim link
+
+Link SRS: https://drive.google.com/file/d/1LuKpb9yIz2fR4uIpsVLpICx0Qx2g4AAk/view?usp=sharing

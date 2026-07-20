@@ -34,7 +34,17 @@ class Cors extends BaseConfig
          *   - ['http://localhost:8080']
          *   - ['https://www.example.com']
          */
-        'allowedOrigins' => [],
+        // Sebelumnya kosong -> browser selalu memblokir request lintas origin ke API ini.
+        // Diisi origin umum untuk pengembangan lokal (Laragon/Live Server/Vite dsb).
+        // Untuk production, ganti dengan domain frontend yang sebenarnya.
+        'allowedOrigins' => [
+            'http://localhost',
+            'http://localhost:8080',
+            'http://localhost:5173',
+            'http://localhost:3000',
+            'http://127.0.0.1',
+            'http://127.0.0.1:8080',
+        ],
 
         /**
          * Origin regex patterns for the `Access-Control-Allow-Origin` header.
@@ -47,7 +57,10 @@ class Cors extends BaseConfig
          * E.g.:
          *   - ['https://\w+\.example\.com']
          */
-        'allowedOriginsPatterns' => [],
+        // Menerima juga semua sub-host *.test bawaan Laragon (mis. dlms.test)
+        'allowedOriginsPatterns' => [
+            'https?://[a-zA-Z0-9\-]+\.test(:\d+)?',
+        ],
 
         /**
          * Weather to send the `Access-Control-Allow-Credentials` header.
@@ -57,6 +70,7 @@ class Cors extends BaseConfig
          *
          * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials
          */
+        // Token JWT dikirim lewat header Authorization, bukan cookie, jadi tidak perlu credentials.
         'supportsCredentials' => false,
 
         /**
@@ -68,7 +82,8 @@ class Cors extends BaseConfig
          *
          * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers
          */
-        'allowedHeaders' => [],
+        // Wajib ada 'Authorization' karena JwtFilter membaca header ini.
+        'allowedHeaders' => ['Content-Type', 'Authorization', 'Accept'],
 
         /**
          * Set headers to expose.
@@ -93,7 +108,7 @@ class Cors extends BaseConfig
          *
          * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Methods
          */
-        'allowedMethods' => [],
+        'allowedMethods' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 
         /**
          * Set how many seconds the results of a preflight request can be cached.

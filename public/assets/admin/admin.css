@@ -1,0 +1,118 @@
+:root {
+  --dlms-navy: #16233f;
+  --dlms-navy-dark: #0f1a2e;
+  --dlms-accent: #c8952a;
+}
+
+body {
+  background: #f4f6fb;
+}
+
+.dlms-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 220px;
+  background: var(--dlms-navy);
+  display: flex;
+  flex-direction: column;
+  padding-top: .5rem;
+}
+
+.dlms-sidebar .brand {
+  color: #fff;
+  font-weight: 700;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  margin-bottom: .5rem;
+}
+
+.dlms-sidebar .brand small {
+  display: block;
+  font-weight: 400;
+  color: rgba(255,255,255,.6);
+  font-size: .75rem;
+}
+
+.dlms-sidebar a {
+  color: rgba(255,255,255,.75);
+  padding: .65rem 1.25rem;
+  text-decoration: none;
+  display: block;
+  font-size: .925rem;
+  border-left: 3px solid transparent;
+}
+
+.dlms-sidebar a:hover {
+  background: rgba(255,255,255,.06);
+  color: #fff;
+}
+
+.dlms-sidebar a.active {
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  border-left-color: var(--dlms-accent);
+  font-weight: 600;
+}
+
+.dlms-sidebar .logout {
+  margin-top: auto;
+  border-top: 1px solid rgba(255,255,255,.1);
+}
+
+.dlms-content {
+  margin-left: 220px;
+  padding: 1.75rem 2rem;
+}
+
+.dlms-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.dlms-stat-card {
+  border: none;
+  border-radius: .75rem;
+  box-shadow: 0 2px 10px rgba(22,35,63,.06);
+}
+
+.dlms-stat-card .stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--dlms-navy);
+}
+
+.dlms-table thead {
+  background: #eef1f8;
+}
+
+.dlms-cover-thumb {
+  width: 40px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #dde1ec;
+}
+
+.dlms-login-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--dlms-navy) 0%, var(--dlms-navy-dark) 100%);
+}
+
+.dlms-login-card {
+  width: 100%;
+  max-width: 380px;
+  border: none;
+  border-radius: 1rem;
+}
+
+@media (max-width: 768px) {
+  .dlms-sidebar { width: 100%; height: auto; position: relative; }
+  .dlms-content { margin-left: 0; }
+}

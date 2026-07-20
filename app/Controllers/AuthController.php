@@ -10,10 +10,17 @@ class AuthController extends ResourceController
     public function register()
     {
         $model = new UserModel();
-        $data = $this->request->getJSON(true);
+        $data  = $this->request->getJSON(true) ?? [];
 
         if (empty($data['nama']) || empty($data['email']) || empty($data['password'])) {
             return $this->fail('Nama, email, dan password wajib diisi', 400);
+        }
+        // Sebelumnya format email dan panjang password tidak divalidasi sama sekali.
+        if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            return $this->fail('Format email tidak valid', 400);
+        }
+        if (strlen($data['password']) < 6) {
+            return $this->fail('Password minimal 6 karakter', 400);
         }
         if ($model->where('email', $data['email'])->first()) {
             return $this->fail('Email sudah terdaftar', 400);
@@ -32,8 +39,8 @@ class AuthController extends ResourceController
     public function login()
     {
         $model = new UserModel();
-        $data = $this->request->getJSON(true);
-        $user = $model->where('email', $data['email'] ?? '')->first();
+        $data  = $this->request->getJSON(true) ?? [];
+        $user  = $model->where('email', $data['email'] ?? '')->first();
 
         if (!$user || !password_verify($data['password'] ?? '', $user['password'])) {
             return $this->failUnauthorized('Email atau password salah');

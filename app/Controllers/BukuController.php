@@ -2,6 +2,9 @@
 namespace App\Controllers;
 
 use App\Models\BukuModel;
+use App\Models\KategoriModel;
+use App\Models\PengunduhanModel;
+use App\Models\PenulisModel;
 use CodeIgniter\RESTful\ResourceController;
 
 class BukuController extends ResourceController
@@ -11,7 +14,28 @@ class BukuController extends ResourceController
 
     public function index()
     {
-        return $this->respond($this->model->findAll());
+        // Dipakai halaman "Koleksi" untuk pencarian & filter dari sisi user:
+        // /api/buku?search=...&kategori_id=...&penulis_id=...
+        $search      = $this->request->getGet('search');
+        $kategori_id = $this->request->getGet('kategori_id');
+        $penulis_id  = $this->request->getGet('penulis_id');
+
+        $builder = $this->model;
+
+        if (!empty($search)) {
+            $builder = $builder->groupStart()
+                ->like('judul', $search)
+                ->orLike('deskripsi', $search)
+                ->groupEnd();
+        }
+        if (!empty($kategori_id)) {
+            $builder = $builder->where('kategori_id', $kategori_id);
+        }
+        if (!empty($penulis_id)) {
+            $builder = $builder->where('penulis_id', $penulis_id);
+        }
+
+        return $this->respond($builder->orderBy('id', 'DESC')->findAll());
     }
 
     public function show($id = null)
@@ -33,21 +57,33 @@ class BukuController extends ResourceController
             return $this->fail('Judul, kategori_id, dan penulis_id wajib diisi', 400);
         }
 
+        // Sebelumnya kategori_id/penulis_id langsung dipakai tanpa dicek keberadaannya,
+        // sehingga id yang tidak valid akan lolos ke query INSERT dan baru gagal di level
+        // database dengan pesan error SQL mentah (bocor detail internal, bukan JSON rapi).
+        if (!(new KategoriModel())->find($kategori_id)) {
+            return $this->fail('kategori_id tidak ditemukan', 400);
+        }
+        if (!(new PenulisModel())->find($penulis_id)) {
+            return $this->fail('penulis_id tidak ditemukan', 400);
+        }
+
         $coverFile = $this->request->getFile('cover');
         $pdfFile   = $this->request->getFile('file_pdf');
 
-        $coverName = null;
-        $pdfName   = null;
-
-        if ($coverFile && $coverFile->isValid() && !$coverFile->hasMoved()) {
-            $coverName = $coverFile->getRandomName();
-            $coverFile->move(FCPATH . 'uploads/covers', $coverName);
+        // Kolom `cover` dan `file_pdf` di migrasi bersifat NOT NULL, jadi kedua file
+        // wajib diunggah saat membuat buku baru, kalau tidak INSERT akan gagal di DB.
+        if (!$coverFile || !$coverFile->isValid()) {
+            return $this->fail('File cover wajib diunggah', 400);
+        }
+        if (!$pdfFile || !$pdfFile->isValid()) {
+            return $this->fail('File PDF wajib diunggah', 400);
         }
 
-        if ($pdfFile && $pdfFile->isValid() && !$pdfFile->hasMoved()) {
-            $pdfName = $pdfFile->getRandomName();
-            $pdfFile->move(FCPATH . 'uploads/pdf', $pdfName);
-        }
+        $coverName = $coverFile->getRandomName();
+        $coverFile->move(FCPATH . 'uploads/covers', $coverName);
+
+        $pdfName = $pdfFile->getRandomName();
+        $pdfFile->move(FCPATH . 'uploads/pdf', $pdfName);
 
         $data = [
             'judul'        => $judul,
@@ -60,22 +96,43 @@ class BukuController extends ResourceController
         ];
 
         $this->model->insert($data);
+        $data['id'] = $this->model->getInsertID();
         return $this->respondCreated($data);
     }
 
     public function update($id = null)
     {
-        if (!$this->model->find($id)) {
+        $existing = $this->model->find($id);
+        if (!$existing) {
             return $this->failNotFound('Buku tidak ditemukan');
         }
 
         $data = $this->request->getPost(['judul', 'deskripsi', 'kategori_id', 'penulis_id', 'tahun_terbit']);
+
+        // BUG lama: getPost() mengembalikan null untuk key yang tidak dikirim form,
+        // lalu null itu ikut di-update ke DB sehingga data lama bisa tertimpa kosong
+        // hanya karena admin lupa mengisi salah satu field di form edit.
+        // Solusi: buang key yang nilainya null (field yang memang tidak dikirim),
+        // supaya update bersifat parsial dan tidak menghapus data yang sudah ada.
+        $data = array_filter($data, fn ($v) => $v !== null);
+
+        if (isset($data['kategori_id']) && !(new KategoriModel())->find($data['kategori_id'])) {
+            return $this->fail('kategori_id tidak ditemukan', 400);
+        }
+        if (isset($data['penulis_id']) && !(new PenulisModel())->find($data['penulis_id'])) {
+            return $this->fail('penulis_id tidak ditemukan', 400);
+        }
 
         $coverFile = $this->request->getFile('cover');
         if ($coverFile && $coverFile->isValid() && !$coverFile->hasMoved()) {
             $coverName = $coverFile->getRandomName();
             $coverFile->move(FCPATH . 'uploads/covers', $coverName);
             $data['cover'] = $coverName;
+
+            // File lama tidak pernah dihapus saat diganti -> sampah menumpuk di server.
+            if (!empty($existing['cover']) && file_exists(FCPATH . 'uploads/covers/' . $existing['cover'])) {
+                unlink(FCPATH . 'uploads/covers/' . $existing['cover']);
+            }
         }
 
         $pdfFile = $this->request->getFile('file_pdf');
@@ -83,10 +140,18 @@ class BukuController extends ResourceController
             $pdfName = $pdfFile->getRandomName();
             $pdfFile->move(FCPATH . 'uploads/pdf', $pdfName);
             $data['file_pdf'] = $pdfName;
+
+            if (!empty($existing['file_pdf']) && file_exists(FCPATH . 'uploads/pdf/' . $existing['file_pdf'])) {
+                unlink(FCPATH . 'uploads/pdf/' . $existing['file_pdf']);
+            }
+        }
+
+        if (empty($data)) {
+            return $this->fail('Tidak ada data untuk diperbarui', 400);
         }
 
         $this->model->update($id, $data);
-        return $this->respond($data);
+        return $this->respond(array_merge($existing, $data));
     }
 
     public function delete($id = null)
@@ -103,5 +168,38 @@ class BukuController extends ResourceController
 
         $this->model->delete($id);
         return $this->respondDeleted(['id' => $id]);
+    }
+
+    /**
+     * Unduh file PDF sebuah buku. Endpoint ini dipasangi filter 'jwt' saja
+     * (bukan 'admin') di Routes.php, artinya siapa pun yang sudah login
+     * (role admin maupun user) boleh mengunduh. Setiap pengunduhan dicatat
+     * ke tabel `pengunduhan` untuk ditampilkan di halaman "Riwayat Unduh"
+     * dan "Buku Saya".
+     */
+    public function download($id = null)
+    {
+        $buku = $this->model->find($id);
+        if (!$buku) {
+            return $this->failNotFound('Buku tidak ditemukan');
+        }
+        if (empty($buku['file_pdf']) || !file_exists(FCPATH . 'uploads/pdf/' . $buku['file_pdf'])) {
+            return $this->failNotFound('File PDF untuk buku ini tidak ditemukan di server');
+        }
+
+        // $request->user diisi oleh JwtFilter dari payload token (lihat AuthController::login).
+        $userId = $this->request->user->id ?? null;
+        if ($userId) {
+            (new PengunduhanModel())->insert([
+                'user_id'       => $userId,
+                'buku_id'       => $id,
+                'tanggal_unduh' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
+        // Nama file unduhan dibuat rapi dari judul buku, bukan nama file acak di server.
+        $namaFile = preg_replace('/[^A-Za-z0-9\- ]/', '', $buku['judul']) . '.pdf';
+
+        return $this->response->download(FCPATH . 'uploads/pdf/' . $buku['file_pdf'], null)->setFileName($namaFile);
     }
 }
